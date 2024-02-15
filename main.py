@@ -50,26 +50,37 @@ def manga_info(data):
     os.system("cls")
     with open("jsons/manga_info.json", "r") as file:
         data = json.load(file)
+        dc = data["chapters"]
 
     print("Selected Manga is: ")
-    print(f"\033[1mTitle\033[0m: {data['title']}")
-    print(f"\033[1mDescription\033[0m: {data['description']['en']}")
-    print(f"\033[1mGenres\033[0m: {', '.join(i for i in data['genres'])}")
-    print(f"\033[1mThemes\033[0m: {', '.join(i for i in data['themes'])}")
-    print(f"\033[1mRelease year\033[0m: {data['releaseDate']}")
+    try:
+        print(f"\033[1mTitle\033[0m: {data['title']}")
+        print(f"\033[1mDescription\033[0m: {data['description']['en']}")
+        print(f"\033[1mGenres\033[0m: {', '.join(i for i in data['genres'])}")
+        print(f"\033[1mThemes\033[0m: {', '.join(i for i in data['themes'])}")
+        print(f"\033[1mRelease year\033[0m: {data['releaseDate']}")
+    except KeyError:
+        pass
 
-    print("\nFollowing Chapters were found:")
-    for i, j in enumerate(data["chapters"], start=1):
-        print(f"{i}. {j['title']} \nPages: {j['pages']}\n")
+    print("\nFollowing Chapters were found:\n")
+
+
+    for j in (reversed(dc)):
+        print(f"Chapter Name: {j["title"]}")
+        print(f"Chapter Number: {j["chapterNumber"]}")
+        print(f"Volume Number: {j["volumeNumber"]}")
+        print(f"Number of pages: {j["pages"]}")
+        print("\n================================\n")
     
     try:
-        user_opt = int(input("Enter the s.no of the manga that you would like to read: "))
-        chapter_id = data["chapters"][user_opt - 1]["id"]
-    except:
+        user_opt = input("Enter the chapter number of the manga that you would like to read: ")
+        chapter_id = [i["id"] for i in dc if ((i["chapterNumber"] == user_opt) if i["chapterNumber"] is not None else True) and i["pages"] != 0][0]
+    except Exception as e:
+        print(e)
         print("Some error occurred. Please try again.")
         exit()
 
-    folder_name = f"{data['title']}_{data['chapters'][user_opt - 1]['title']}"
+    folder_name = [f"{data['title']}_{i["title"]}_Chapter-{i["chapterNumber"]}_Vol-{i["volumeNumber"]}" for i in dc if i["id"] == chapter_id][0]
 
     get_mangas(chapter_id, folder_name)
 
